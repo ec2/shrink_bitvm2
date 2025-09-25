@@ -1,10 +1,6 @@
 target
-.git
-.gitignore
-.gitmodules
 .env
 cache
-.github
 crates/**/target
 examples/**/target
 
