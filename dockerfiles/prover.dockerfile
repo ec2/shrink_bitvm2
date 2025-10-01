@@ -29,6 +29,10 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y \
 RUN cargo install cargo-chef
 RUN cargo install sccache 
 ENV RUSTC_WRAPPER=sccache SCCACHE_DIR=/sccache
+ENV CMAKE_C_COMPILER_LAUNCHER=sccache
+ENV CMAKE_CXX_COMPILER_LAUNCHER=sccache
+ENV CC="sccache clang"
+ENV CXX="sccache clang++"
 
 # Install protoc
 RUN curl -o protoc.zip -L https://github.com/protocolbuffers/protobuf/releases/download/v31.1/protoc-31.1-linux-x86_64.zip \
@@ -62,8 +66,8 @@ WORKDIR /src/
 ADD https://github.com/iden3/circom.git#e60c4ab8a0b55672f0f42fbc68a74203bdb6a700 circom
 RUN (cd circom; cargo install --path circom)
 
-ENV CC=clang
-ENV CXX=clang++
+ENV CC="sccache clang"
+ENV CXX="sccache clang++"
 
 # Build rapidsnark
 RUN git clone https://github.com/iden3/rapidsnark.git && \
@@ -107,7 +111,7 @@ FROM base-deps AS rust-builder
 #     --generate-code arch=compute_89,code=sm_89 \
 #     --generate-code arch=compute_120,code=sm_120"
 
-ARG NVCC_APPEND_FLAGS="--generate-code arch=compute_86,code=sm_86"
+ARG NVCC_APPEND_FLAGS="--generate-code arch=compute_120,code=sm_120"
 ARG CUDA_OPT_LEVEL=1
 ENV NVCC_APPEND_FLAGS=${NVCC_APPEND_FLAGS}
 # Consider using if building and running on the same CPU
@@ -150,6 +154,7 @@ COPY --from=rust-builder /src/shrink_bitvm2_prover/target/release/prover ./prove
 
 # Builds the graph file for circom-witnesscalc
 RUN ./setup download
+
 # Runs the groth16 setup needed for the GPU prover. 
 RUN  --device=nvidia.com/gpu=all ./setup setup
 
