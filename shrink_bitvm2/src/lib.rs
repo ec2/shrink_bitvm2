@@ -3,11 +3,10 @@ use std::path::Path;
 use anyhow::{Context, Result};
 use hex::FromHex;
 pub use receipt_claim::*;
+use risc0_circuit_recursion::control_id::BN254_IDENTITY_CONTROL_ID;
 use risc0_groth16::{ProofJson as Groth16ProofJson, Seal as Groth16Seal};
 use risc0_zkvm::sha::Digestible;
-use risc0_zkvm::{
-    Digest, Groth16Receipt, MaybePruned, Receipt, ReceiptClaim, SuccinctReceipt, digest,
-};
+use risc0_zkvm::{Digest, Groth16Receipt, MaybePruned, Receipt, ReceiptClaim, SuccinctReceipt};
 use tempfile::tempdir;
 
 #[cfg(feature = "prove")]
@@ -16,11 +15,7 @@ mod receipt_claim;
 pub mod verify;
 
 use prove::identity_seal_json;
-use verify::verify_proof;
-
-// TODO(ec2): Is there a better way of handling this?
-pub const BN254_IDENTITY_CONTROL_ID: Digest =
-    digest!("c07a65145c3cb48b6101962ea607a4dd93c753bb26975cb47feb00d3666e4404");
+use verify::verify_integrity;
 
 pub fn succinct_to_bitvm2(
     succinct_receipt: &SuccinctReceipt<ReceiptClaim>,
@@ -67,7 +62,7 @@ pub fn shrink_wrap(
 
     let seal: Groth16Seal = proof_json.clone().try_into()?;
 
-    verify_proof(&seal, &bvm2_claim_digest)?;
+    verify_integrity(&seal, &bvm2_claim_digest)?;
     Ok(proof_json)
 }
 
@@ -97,16 +92,9 @@ mod tests {
     #[cfg(feature = "prove")]
     #[test]
     fn test_succinct_to_bitvm2() {
-        tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-            .init();
         let input = [3u8; 32];
 
-        let env = ExecutorEnv::builder()
-            // Send a & b to the guest
-            .write_slice(&input)
-            .build()
-            .unwrap();
+        let env = ExecutorEnv::builder().write_slice(&input).build().unwrap();
 
         // Obtain the default prover.
         let prover = default_prover();
@@ -126,11 +114,7 @@ mod tests {
     fn test_invalid_input_size() {
         let input = [3u8; 33];
 
-        let env = ExecutorEnv::builder()
-            // Send a & b to the guest
-            .write_slice(&input)
-            .build()
-            .unwrap();
+        let env = ExecutorEnv::builder().write_slice(&input).build().unwrap();
 
         // Obtain the default prover.
         let prover = default_prover();
@@ -146,5 +130,30 @@ mod tests {
             succinct_to_bitvm2(succinct_receipt, &input).is_err(),
             "Should fail because shrink_bitvm2 only supports 32-byte journals"
         );
+    }
+    #[cfg(feature = "prove")]
+    #[test]
+    fn test_verify() {
+        use guest::ECHO_ID;
+
+        tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+            .init();
+        let input = [3u8; 32];
+
+        let env = ExecutorEnv::builder().write_slice(&input).build().unwrap();
+
+        // Obtain the default prover.
+        let prover = default_prover();
+
+        // Produce a receipt by proving the specified ELF binary.
+        let receipt = prover
+            .prove_with_opts(env, ECHO_ELF, &ProverOpts::succinct())
+            .unwrap()
+            .receipt;
+        let succinct_receipt = receipt.inner.succinct().unwrap();
+
+        let receipt = succinct_to_bitvm2(succinct_receipt, &input).unwrap();
+        receipt.verify(ECHO_ID).unwrap();
     }
 }

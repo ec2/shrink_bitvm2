@@ -1,8 +1,10 @@
-use anyhow::Result;
+use anyhow::{Result, ensure};
 use risc0_groth16::Seal as Groth16Seal;
+use risc0_zkvm::{Digest, sha::Digestible};
 
-use anyhow::ensure;
-pub fn verify_proof(seal: &Groth16Seal, output_bytes: &[u8]) -> Result<()> {
+use crate::ShrinkBitvm2ReceiptClaim;
+
+pub fn verify_integrity(seal: &Groth16Seal, output_bytes: &[u8]) -> Result<()> {
     use ark_ff::PrimeField;
 
     let ark_proof = from_seal(&seal.to_vec());
@@ -17,6 +19,18 @@ pub fn verify_proof(seal: &Groth16Seal, output_bytes: &[u8]) -> Result<()> {
     .unwrap();
     ensure!(res, "proof verification failed");
     Ok(())
+}
+
+pub fn verify_proof(
+    seal: &Groth16Seal,
+    image_id: impl Into<Digest>,
+    journal: Vec<u8>,
+) -> Result<()> {
+    let bvm2_claim_digest: [u8; 32] = ShrinkBitvm2ReceiptClaim::ok(image_id, journal)
+        .digest()
+        .into();
+
+    verify_integrity(seal, &bvm2_claim_digest)
 }
 
 pub fn get_ark_verifying_key() -> ark_groth16::VerifyingKey<ark_bn254::Bn254> {
