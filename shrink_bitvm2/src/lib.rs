@@ -1,51 +1,44 @@
-use std::path::Path;
+use anyhow::Result;
+use risc0_zkvm::{Receipt, ReceiptClaim, SuccinctReceipt};
 
-use anyhow::{Context, Result};
-use hex::FromHex;
 pub use receipt_claim::*;
 use risc0_circuit_recursion::control_id::BN254_IDENTITY_CONTROL_ID;
-use risc0_groth16::{ProofJson as Groth16ProofJson, Seal as Groth16Seal};
-use risc0_zkvm::sha::Digestible;
-use risc0_zkvm::{Digest, Groth16Receipt, MaybePruned, Receipt, ReceiptClaim, SuccinctReceipt};
-use tempfile::tempdir;
+
+#[cfg(feature = "prove")]
+use {
+    anyhow::Context,
+    hex::FromHex,
+    risc0_groth16::{ProofJson as Groth16ProofJson, Seal as Groth16Seal},
+    risc0_zkvm::sha::Digestible,
+    risc0_zkvm::{Digest, Groth16Receipt, MaybePruned},
+    std::path::Path,
+    tempfile::tempdir,
+};
 
 #[cfg(feature = "prove")]
 mod prove;
-mod receipt_claim;
+pub mod receipt_claim;
 pub mod verify;
 
-use prove::identity_seal_json;
-use verify::verify_integrity;
-
+#[cfg(feature = "prove")]
 pub fn succinct_to_bitvm2(
     succinct_receipt: &SuccinctReceipt<ReceiptClaim>,
     journal: &[u8],
 ) -> Result<Receipt> {
-    #[cfg(feature = "prove")]
-    {
-        let p254_receipt: SuccinctReceipt<ReceiptClaim> =
-            risc0_zkvm::recursion::identity_p254(succinct_receipt).unwrap();
-        let receipt_claim = p254_receipt.claim.clone();
-        let seal = shrink_wrap(&p254_receipt, journal)?;
-        finalize(journal.to_vec(), receipt_claim, &seal.try_into()?)
-    }
-    #[cfg(not(feature = "prove"))]
-    {
-        bail!("succinct_to_bitvm2 called without the 'prove' feature enabled");
-    }
+    let p254_receipt: SuccinctReceipt<ReceiptClaim> =
+        risc0_zkvm::recursion::identity_p254(succinct_receipt).unwrap();
+    let receipt_claim = p254_receipt.claim.clone();
+    let seal = shrink_wrap(&p254_receipt, journal)?;
+    finalize(journal.to_vec(), receipt_claim, &seal.try_into()?)
 }
 
+#[cfg(feature = "prove")]
 pub fn shrink_wrap(
     p254_receipt: &SuccinctReceipt<ReceiptClaim>,
     journal: &[u8],
 ) -> Result<Groth16ProofJson> {
-    #[cfg(not(feature = "prove"))]
-    {
-        bail!("shrink_wrap called without the 'prove' feature enabled");
-    }
-
     let image_id = p254_receipt.claim.as_value()?.pre.digest();
-    let seal_json = identity_seal_json(journal, p254_receipt)?;
+    let seal_json = prove::identity_seal_json(journal, p254_receipt)?;
 
     let tmp_dir = tempdir().context("failed to create temporary directory")?;
     let work_dir = std::env::var("SHRINK_BVM2_WORK_DIR");
@@ -62,10 +55,10 @@ pub fn shrink_wrap(
 
     let seal: Groth16Seal = proof_json.clone().try_into()?;
 
-    verify_integrity(&seal, &bvm2_claim_digest)?;
+    verify::verify_integrity(&seal, &bvm2_claim_digest)?;
     Ok(proof_json)
 }
-
+#[cfg(feature = "prove")]
 fn finalize(
     journal_bytes: Vec<u8>,
     receipt_claim: MaybePruned<ReceiptClaim>,
@@ -73,7 +66,7 @@ fn finalize(
 ) -> Result<Receipt> {
     let verifier_parameters_digest =
         Digest::from_hex("b72859b60cfe0bb13cbde70859fbc67ef9dbd5410bbe66bdb7be64a3dcf6814e")
-            .unwrap(); // TODO(ec2): dont hardcode this (actually not sure if this is ever even used, so could be digest zero)
+            .unwrap(); // TODO(ec2): dont hardcode this. used for selector on chain
     let groth16_receipt =
         Groth16Receipt::new(seal.to_vec(), receipt_claim, verifier_parameters_digest);
     let receipt = Receipt::new(
@@ -81,6 +74,26 @@ fn finalize(
         journal_bytes,
     );
     Ok(receipt)
+}
+
+#[cfg(not(feature = "prove"))]
+pub fn succinct_to_bitvm2(
+    _succinct_receipt: &SuccinctReceipt<ReceiptClaim>,
+    _journal: &[u8],
+) -> Result<Receipt> {
+    unimplemented!(
+        "shrink_bitvm2 must be built with the 'prove' feature to convert a SuccinctReceipt to a ShrinkBitvm2 Receipt"
+    );
+}
+
+#[cfg(not(feature = "prove"))]
+pub fn shrink_wrap(
+    _p254_receipt: &SuccinctReceipt<ReceiptClaim>,
+    _journal: &[u8],
+) -> Result<Receipt> {
+    unimplemented!(
+        "shrink_bitvm2 must be built with the 'prove' feature to convert a SuccinctReceipt to a ShrinkBitvm2 Receipt"
+    );
 }
 
 #[cfg(test)]

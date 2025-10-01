@@ -30,6 +30,9 @@ impl ShrinkBitvm2ReceiptClaim {
             journal: journal.into(),
         }
     }
+    pub fn claim_digest(&self) -> Digest {
+        self.digest()
+    }
 }
 
 impl Digestible for ShrinkBitvm2ReceiptClaim {

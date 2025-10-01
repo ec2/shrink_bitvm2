@@ -1,9 +1,10 @@
 {
     "rust-analyzer.check.allTargets": true,
-    "rust-analyzer.check.features": [
-        "prove",
-        "cuda"
-    ],
+    // "rust-analyzer.check.features": [
+    //     "prove",
+    //     "cuda"
+    // ],
+    "rust-analyzer.cargo.features": "all",
     "rust-analyzer.server.extraEnv": {
         "RISC0_SKIP_BUILD": "1",
         "RISC0_SKIP_BUILD_KERNELS": "1",
@@ -15,6 +16,7 @@
     ],
     "rust-analyzer.linkedProjects": [
         "./Cargo.toml",
+        "./boundless_example/Cargo.toml",
     ],
     "rust-analyzer.files.exclude": [
         "./lib/",

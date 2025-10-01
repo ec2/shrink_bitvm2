@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["shrink_bitvm2", "xtask", "guest"]
-
+exclude = ["boundless_example"]
 [workspace.dependencies]
 guest = { path = "guest" }
 
