@@ -28,8 +28,8 @@ num-bigint = { workspace = true, features=["std"] }
 num-traits.workspace = true
 
 # cuda
-circom-witnesscalc = { version = "0.2.1", optional = true }
-wtns-file = { version = "0.1.5", optional = true }
+circom-witnesscalc = { version = "0.2.1" }
+wtns-file = { version = "0.1.5" }
 
 [dev-dependencies]
 guest.workspace = true
@@ -38,4 +38,4 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [features]
 default = ["prove"]
 prove = ["risc0-zkvm/prove"]
-cuda = ["prove", "risc0-zkvm/cuda", "risc0-groth16/cuda", "dep:wtns-file", "dep:circom-witnesscalc"]
+cuda = ["prove", "risc0-zkvm/cuda", "risc0-groth16/cuda"]

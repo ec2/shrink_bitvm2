@@ -118,7 +118,7 @@ mod tests {
             .receipt;
         let succinct_receipt = receipt.inner.succinct().unwrap();
 
-        assert!(succinct_to_bitvm2(succinct_receipt, &input).is_ok());
+        succinct_to_bitvm2(succinct_receipt, &input).unwrap();
     }
 
     // #[cfg(feature = "prove")]

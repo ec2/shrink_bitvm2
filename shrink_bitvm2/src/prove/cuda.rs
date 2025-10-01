@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{io::Cursor, path::Path};
+use std::path::Path;
 
-use anyhow::{Context as _, Result, anyhow};
+use anyhow::{Context as _, Result};
 use risc0_groth16_sys::{ProverParams, SetupParams, WitnessParams};
 
+use crate::prove::witgen::calculate_witness;
 use risc0_groth16::ProofJson as Groth16ProofJson;
 
 pub fn shrink_wrap(
@@ -38,7 +39,7 @@ pub fn shrink_wrap(
     witness_params.graph_path = root_dir.join("verify_for_guest_graph.bin");
     tracing::info!("graph path: {:?}", witness_params.graph_path);
 
-    let witness = calc_witness(
+    let witness = calculate_witness(
         &witness_params.graph_path,
         identity_seal_json.to_string().as_str(),
     )?;
@@ -57,26 +58,4 @@ pub fn shrink_wrap(
             .context("failed to read groth16 prove output file")?;
         serde_json::from_str(&contents).context("failed to decode groth16 prove output file JSON")
     }
-}
-
-struct CalcWitness {
-    witness: Vec<wtns_file::FieldElement<32>>,
-}
-
-impl CalcWitness {
-    fn as_ptr(&self) -> *const u8 {
-        self.witness.as_ptr() as *const u8
-    }
-}
-
-fn calc_witness(graph_path: &Path, inputs: &str) -> Result<CalcWitness> {
-    tracing::info!("calc_witness_cw");
-    let graph = std::fs::read(graph_path)?;
-    tracing::info!("graph file read");
-    let witness_encoded = circom_witnesscalc::calc_witness(inputs, &graph)
-        .map_err(|err| anyhow!("witness failure: {err}"))?;
-    let wtns_f = wtns_file::WtnsFile::read(Cursor::new(witness_encoded))?;
-    Ok(CalcWitness {
-        witness: wtns_f.witness.0,
-    })
 }
