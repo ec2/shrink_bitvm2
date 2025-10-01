@@ -121,30 +121,30 @@ mod tests {
         succinct_to_bitvm2(succinct_receipt, &input).unwrap();
     }
 
-    // #[cfg(feature = "prove")]
-    // #[test]
-    // fn test_invalid_input_size() {
-    //     let input = [3u8; 33];
+    #[cfg(feature = "prove")]
+    #[test]
+    fn test_invalid_input_size() {
+        let input = [3u8; 33];
 
-    //     let env = ExecutorEnv::builder()
-    //         // Send a & b to the guest
-    //         .write_slice(&input)
-    //         .build()
-    //         .unwrap();
+        let env = ExecutorEnv::builder()
+            // Send a & b to the guest
+            .write_slice(&input)
+            .build()
+            .unwrap();
 
-    //     // Obtain the default prover.
-    //     let prover = default_prover();
+        // Obtain the default prover.
+        let prover = default_prover();
 
-    //     // Produce a receipt by proving the specified ELF binary.
-    //     let receipt = prover
-    //         .prove_with_opts(env, ECHO_ELF, &ProverOpts::succinct())
-    //         .unwrap()
-    //         .receipt;
-    //     let succinct_receipt = receipt.inner.succinct().unwrap();
+        // Produce a receipt by proving the specified ELF binary.
+        let receipt = prover
+            .prove_with_opts(env, ECHO_ELF, &ProverOpts::succinct())
+            .unwrap()
+            .receipt;
+        let succinct_receipt = receipt.inner.succinct().unwrap();
 
-    //     assert!(
-    //         succinct_to_bitvm2(succinct_receipt, &input).is_err(),
-    //         "Should fail because shrink_bitvm2 only supports 32-byte journals"
-    //     );
-    // }
+        assert!(
+            succinct_to_bitvm2(succinct_receipt, &input).is_err(),
+            "Should fail because shrink_bitvm2 only supports 32-byte journals"
+        );
+    }
 }
