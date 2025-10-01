@@ -50,18 +50,16 @@ fn download_circuits(sh: &Shell) {
     }
     sh.create_dir("groth16_proof").unwrap();
     sh.create_dir("groth16_proof/circuits").unwrap();
-    // Copy circuit files every time because we modify verify_for_guest.circom
+    // Copy circuit files every time because we modify stark_verify.circom
     for file in CIRCUIT_FILES {
         let src = format!("risc0-to-bitvm2/groth16_proof/circuits/{file}");
         let dst = format!("groth16_proof/circuits/{file}");
-        if !sh.path_exists(&dst) {
-            sh.copy_file(&src, &dst).unwrap();
-        }
+        sh.copy_file(&src, &dst).unwrap();
     }
     // Delete the last line of stark_verify.circom so that we only use its template
     cmd!(
         sh,
-        "sed -i $d ./groth16_proof/circuits/verify_for_guest.circom"
+        "sed -i '$d' ./groth16_proof/circuits/stark_verify.circom"
     )
     .run()
     .unwrap();

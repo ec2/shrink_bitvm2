@@ -31,6 +31,10 @@ num-traits.workspace = true
 circom-witnesscalc = { version = "0.2.1", optional = true }
 wtns-file = { version = "0.1.5", optional = true }
 
+[dev-dependencies]
+guest.workspace = true
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
 [features]
 default = ["prove"]
 prove = ["risc0-zkvm/prove"]

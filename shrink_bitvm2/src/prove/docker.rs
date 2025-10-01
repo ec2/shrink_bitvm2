@@ -24,7 +24,13 @@ pub fn shrink_wrap(
 
     let volume = format!("{}:/mnt", work_dir.display());
     let status = Command::new("docker")
-        .args(["run", "--rm", "-v", &volume, "circomwitcalc-g16:latest"])
+        .args([
+            "run",
+            "--rm",
+            "-v",
+            &volume,
+            "ozancw/risc0-to-bitvm2-groth16-prover:latest",
+        ])
         .status()?;
 
     anyhow::ensure!(

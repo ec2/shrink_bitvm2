@@ -1,3 +1,3 @@
 [alias]
 xtask = "run --package xtask --release --"
-xtask-groth16 = "run --package xtask --no-default-features -F setup-groth16 -- setup-groth16"
+xtask-groth16 = "run --package xtask --no-default-features -F setup-groth16 --release -- setup-groth16"

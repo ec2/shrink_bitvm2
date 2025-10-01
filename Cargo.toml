@@ -1,8 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["shrink_bitvm2", "xtask"]
+members = ["shrink_bitvm2", "xtask", "guest"]
 
 [workspace.dependencies]
+guest = { path = "guest" }
+
 risc0-zkvm = { version = "3.0.3", default-features = false }
 risc0-zkp = { version = "3.0.2", default-features = false }
 risc0-circuit-recursion = "4.0.2"
