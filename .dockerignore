@@ -1,6 +1,0 @@
-target
-.env
-cache
-crates/**/target
-examples/**/target
-

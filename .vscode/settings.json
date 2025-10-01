@@ -12,7 +12,6 @@
     ],
     "rust-analyzer.linkedProjects": [
         "./Cargo.toml",
-        "./shrink_bitvm2_gpu/Cargo.toml",
     ],
     "rust-analyzer.files.exclude": [
         "./lib/",

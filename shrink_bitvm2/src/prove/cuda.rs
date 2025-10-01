@@ -42,7 +42,6 @@ pub fn shrink_wrap(
         &witness_params.graph_path,
         identity_seal_json.to_string().as_str(),
     )?;
-    // .context("failed to calculate groth16 witness")?;
 
     tracing::info!("gpu prove start");
     {
@@ -70,7 +69,7 @@ impl CalcWitness {
     }
 }
 
-pub fn calc_witness(graph_path: &Path, inputs: &str) -> Result<CalcWitness> {
+fn calc_witness(graph_path: &Path, inputs: &str) -> Result<CalcWitness> {
     tracing::info!("calc_witness_cw");
     let graph = std::fs::read(graph_path)?;
     tracing::info!("graph file read");

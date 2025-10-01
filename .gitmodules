@@ -1,3 +1,0 @@
-[submodule "risc0-to-bitvm2"]
-	path = risc0-to-bitvm2
-	url = https://github.com/ec2/risc0-to-bitvm2-boundless.git

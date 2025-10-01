@@ -1,7 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["shrink_bitvm2"]
-exclude = ["shrink_bitvm2_prover"]
+members = ["shrink_bitvm2", "xtask"]
 
 [workspace.dependencies]
 risc0-zkvm = { version = "3.0.3", default-features = false }
@@ -9,8 +8,6 @@ risc0-zkp = { version = "3.0.2", default-features = false }
 risc0-circuit-recursion = "4.0.2"
 risc0-groth16 = { version = "3.0.2", features = ["prove"] }
 risc0-groth16-sys = { version = "0.1.0" }
-risc0-build = { version = "3.0.3" }
-risc0-binfmt = {version = "3.0.2"}
 
 hex = "0.4.3"
 env_logger = "0.10"
@@ -25,3 +22,22 @@ num-bigint = { version="0.4.5", features=["std"] }
 num-traits = "0.2.19"
 tracing = "0.1.40"
 tracing-subscriber = {version = "0.3.19", features = ["env-filter"] }
+blake3 = { version = "1.5.0" }
+
+ark-bn254 = "0.5.0"
+ark-ff = "0.5.0"
+ark-groth16 = { version = "0.5.0" }
+ark-serialize = "0.5.0"
+
+
+sha2 = "0.10"
+
+
+[patch.crates-io]
+risc0-groth16 = { git = "https://github.com/ec2/risc0.git", rev = "5701800c54e1e3e9ba5fae95f901050b17eb296a" }
+risc0-groth16-sys = { git = "https://github.com/ec2/risc0.git", rev = "5701800c54e1e3e9ba5fae95f901050b17eb296a" }
+risc0-zkp = { git = "https://github.com/ec2/risc0.git", rev = "5701800c54e1e3e9ba5fae95f901050b17eb296a" }
+risc0-binfmt = { git = "https://github.com/ec2/risc0.git", rev = "5701800c54e1e3e9ba5fae95f901050b17eb296a" }
+risc0-build = { git = "https://github.com/ec2/risc0.git", rev = "5701800c54e1e3e9ba5fae95f901050b17eb296a" }
+risc0-zkvm = { git = "https://github.com/ec2/risc0.git", rev = "5701800c54e1e3e9ba5fae95f901050b17eb296a" }
+risc0-circuit-recursion = { git = "https://github.com/ec2/risc0.git", rev = "5701800c54e1e3e9ba5fae95f901050b17eb296a" }

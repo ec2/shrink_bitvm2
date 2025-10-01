@@ -1,7 +1,5 @@
 use std::path::Path;
 
-// use crate::is_docker_installed;
-use crate::write_seal;
 use anyhow::Result;
 use anyhow::bail;
 use risc0_groth16::ProofJson as Groth16ProofJson;
@@ -17,11 +15,9 @@ pub fn shrink_wrap(
     work_dir: &Path,
     identity_seal_json: serde_json::Value,
 ) -> Result<Groth16ProofJson> {
-    // let sh = Shell::new()?;
-
-    // if !is_docker_installed() {
-    //     bail!("Please install docker first.")
-    // }
+    if !is_docker_installed() {
+        bail!("Please install docker first.")
+    }
     let seal_path = work_dir.join("input.json");
     let proof_path = work_dir.join("proof.json");
     write_seal(identity_seal_json, &seal_path)?;
@@ -41,4 +37,17 @@ pub fn shrink_wrap(
     let proof_json: Groth16ProofJson = serde_json::from_str(&proof_content)?;
 
     Ok(proof_json)
+}
+
+fn write_seal(seal_json: serde_json::Value, seal_path: &Path) -> Result<()> {
+    std::fs::write(seal_path, serde_json::to_string_pretty(&seal_json)?)?;
+    Ok(())
+}
+
+fn is_docker_installed() -> bool {
+    Command::new("docker")
+        .arg("--version")
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
 }
