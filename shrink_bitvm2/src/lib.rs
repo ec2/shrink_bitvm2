@@ -1,16 +1,16 @@
 use anyhow::Result;
-use risc0_zkvm::{Receipt, ReceiptClaim, SuccinctReceipt};
-
 pub use receipt_claim::*;
 use risc0_circuit_recursion::control_id::BN254_IDENTITY_CONTROL_ID;
+use risc0_groth16::Seal as Groth16Seal;
+use risc0_zkvm::{MaybePruned, Receipt, ReceiptClaim, SuccinctReceipt};
 
 #[cfg(feature = "prove")]
 use {
     anyhow::Context,
     hex::FromHex,
-    risc0_groth16::{ProofJson as Groth16ProofJson, Seal as Groth16Seal},
+    risc0_groth16::ProofJson as Groth16ProofJson,
     risc0_zkvm::sha::Digestible,
-    risc0_zkvm::{Digest, Groth16Receipt, MaybePruned},
+    risc0_zkvm::{Digest, Groth16Receipt},
     std::path::Path,
     tempfile::tempdir,
 };
@@ -59,7 +59,7 @@ pub fn shrink_wrap(
     Ok(proof_json)
 }
 #[cfg(feature = "prove")]
-fn finalize(
+pub fn finalize(
     journal_bytes: Vec<u8>,
     receipt_claim: MaybePruned<ReceiptClaim>,
     seal: &Groth16Seal,
@@ -90,6 +90,17 @@ pub fn succinct_to_bitvm2(
 pub fn shrink_wrap(
     _p254_receipt: &SuccinctReceipt<ReceiptClaim>,
     _journal: &[u8],
+) -> Result<Receipt> {
+    unimplemented!(
+        "shrink_bitvm2 must be built with the 'prove' feature to convert a SuccinctReceipt to a ShrinkBitvm2 Receipt"
+    );
+}
+
+#[cfg(not(feature = "prove"))]
+pub fn finalize(
+    _journal_bytes: Vec<u8>,
+    _receipt_claim: MaybePruned<ReceiptClaim>,
+    _seal: &Groth16Seal,
 ) -> Result<Receipt> {
     unimplemented!(
         "shrink_bitvm2 must be built with the 'prove' feature to convert a SuccinctReceipt to a ShrinkBitvm2 Receipt"
