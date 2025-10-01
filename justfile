@@ -2,11 +2,13 @@
 default:
     @just --list
 
-# Build the GPU prover Docker image
-build-gpu-prover-docker:
-    docker build --load -t gpu-prover:latest -f dockerfiles/prover.dockerfile --builder gpubuilder --allow device --allow=device=nvidia.com/gpu=all --target prover .
+# Preprocess files needed for Groth16 proving system
+setup:
+    cargo xtask setup-groth16
 
-# Build the rapidsnark Docker image
-build-rapidsnark-docker:
-    docker build --load -t rapidsnark-prover:latest -f dockerfiles/prover.dockerfile --builder gpubuilder --allow device --allow=device=nvidia.com/gpu=all --target rapidsnark-prover .
+# Run the Groth16 cpu prover tests
+test-groth16-cpu:
+    cargo t -r -F prove 
 
+test-groth16-gpu:
+    cargo t -r -F cuda
