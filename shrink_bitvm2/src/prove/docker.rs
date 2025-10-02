@@ -26,7 +26,6 @@ pub fn shrink_wrap(
         calculate_witness_encoded(&graph_path, identity_seal_json.to_string().as_str())?;
     std::fs::write(&witness_path, witness_encoded)?;
 
-    write_seal(identity_seal_json, &seal_path)?;
     let status = Command::new("rapidsnark")
         .arg(root_dir.join("verify_for_guest_final.zkey"))
         .arg(witness_path)

@@ -5631,16 +5631,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-groth16-sys"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "580750e1394c5a79b691c8197906263f17a1d3aa7bb46a934362f1ba1475b1a5"
-dependencies = [
- "anyhow",
- "risc0-build-kernel",
-]
-
-[[package]]
 name = "risc0-sys"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6387,7 +6377,6 @@ dependencies = [
  "num-traits",
  "risc0-circuit-recursion",
  "risc0-groth16",
- "risc0-groth16-sys",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",

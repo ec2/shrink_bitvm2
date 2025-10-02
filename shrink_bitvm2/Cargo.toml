@@ -7,7 +7,7 @@ edition = "2024"
 anyhow.workspace = true
 borsh.workspace = true
 risc0-groth16 = { workspace = true }
-risc0-groth16-sys = { workspace = true }
+risc0-groth16-sys = { workspace = true, optional = true }
 risc0-circuit-recursion = { workspace = true }
 risc0-zkp = { workspace = true }
 serde_json.workspace = true
@@ -39,4 +39,4 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [features]
 default = ["prove"]
 prove = ["risc0-zkvm/prove"]
-cuda = ["prove", "risc0-zkvm/cuda", "risc0-groth16/cuda"]
+cuda = ["prove", "risc0-zkvm/cuda", "risc0-groth16/cuda", "dep:risc0-groth16-sys"]
