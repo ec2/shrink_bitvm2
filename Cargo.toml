@@ -7,8 +7,8 @@ guest = { path = "guest" }
 
 risc0-zkvm = { version = "3.0.3", default-features = false }
 risc0-zkp = { version = "3.0.2", default-features = false }
-risc0-circuit-recursion = "4.0.2"
-risc0-groth16 = { version = "3.0.2", features = ["prove"] }
+risc0-circuit-recursion = { version = "4.0.2", default-features = false }
+risc0-groth16 = { version = "3.0.2", default-features = false }
 risc0-groth16-sys = { version = "0.1.0" }
 
 hex = "0.4.3"
