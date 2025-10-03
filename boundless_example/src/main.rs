@@ -1,8 +1,4 @@
-use alloy::{
-    primitives::{Address, B256},
-    signers::local::PrivateKeySigner,
-    sol_types::SolCall,
-};
+use alloy::signers::local::PrivateKeySigner;
 use anyhow::{Context, Result, anyhow};
 use boundless_market::{
     Client, GuestEnvBuilder, StandardStorageProvider,
@@ -10,7 +6,9 @@ use boundless_market::{
     request_builder::{OfferParams, RequirementParams},
     storage::{StorageProviderConfig, TempFileStorageProvider},
 };
+use clap::Parser;
 use guest::{ECHO_ELF, ECHO_ID};
+use std::{str::FromStr, time::Duration};
 use tracing_subscriber::{EnvFilter, filter::LevelFilter, prelude::*};
 use url::Url;
 /// Arguments of the publisher CLI.
@@ -24,8 +22,8 @@ struct Args {
     #[clap(short, long, env)]
     private_key: PrivateKeySigner,
     /// Storage provider to use
-    #[clap(flatten)]
-    storage_config: Option<StorageProviderConfig>,
+    #[clap(flatten, next_help_heading = "Storage Provider")]
+    storage_config: StorageProviderConfig,
     /// URL where provers can download the program to be proven.
     #[clap(long, env)]
     program_url: Option<Url>,
@@ -58,7 +56,7 @@ async fn run(args: Args) -> Result<()> {
     // Create a Boundless client from the provided parameters.
     let client = Client::builder()
         .with_rpc_url(args.rpc_url)
-        .with_deployment(args.deployment)
+        .with_deployment(args.boundless_deployment)
         .with_storage_provider_config(&args.storage_config)?
         .with_private_key(args.private_key)
         .build()
@@ -75,7 +73,7 @@ async fn run(args: Args) -> Result<()> {
             .claim_digest();
 
     // Build the request based on whether program URL is provided
-    let request = client
+    let mut request = client
         .new_request()
         .with_requirements(
             RequirementParams::builder()
@@ -88,7 +86,7 @@ async fn run(args: Args) -> Result<()> {
                 .timeout(1000)
                 .lock_timeout(1000),
         )
-        .with_stdin(echo_message.as_bytes())
+        .with_stdin(echo_message)
         .with_shrink_bitvm2_proof();
 
     request = if let Some(program_url) = args.program_url {

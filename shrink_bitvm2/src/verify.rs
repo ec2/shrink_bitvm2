@@ -1,4 +1,5 @@
 use anyhow::{Result, ensure};
+use ark_serialize::CanonicalSerialize;
 use risc0_groth16::Seal as Groth16Seal;
 use risc0_zkvm::{Digest, sha::Digestible};
 
@@ -150,12 +151,13 @@ pub fn get_ark_verifying_key() -> ark_groth16::VerifyingKey<ark_bn254::Bn254> {
 }
 
 pub fn get_r0_verifying_key() -> risc0_groth16::VerifyingKey {
-    let json_content = std::fs::read_to_string("/home/etu/risc0-to-bitvm2/vkey_guest.json")
-        .expect("Failed to read verification key JSON file");
-    let vk_json: risc0_groth16::VerifyingKeyJson =
-        serde_json::from_str(&json_content).expect("Failed to parse verification key JSON");
-
-    vk_json.verifying_key().unwrap()
+    let ark_key = get_ark_verifying_key();
+    let mut b = vec![];
+    ark_key.serialize_uncompressed(&mut b).unwrap();
+    let j = serde_json::to_string(&b).expect("Failed to serialize verification key to JSON");
+    let vk: risc0_groth16::VerifyingKey =
+        serde_json::from_str(j.as_str()).expect("failed to parse JSON");
+    vk
 }
 
 fn from_seal(seal_bytes: &[u8]) -> ark_groth16::Proof<ark_bn254::Bn254> {
@@ -186,4 +188,25 @@ fn from_seal(seal_bytes: &[u8]) -> ark_groth16::Proof<ark_bn254::Bn254> {
     );
 
     ark_groth16::Proof { a, b, c }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use risc0_zkvm::{Groth16ReceiptVerifierParameters, sha::Digestible};
+
+    #[test]
+    fn print_verifier_digest() {
+        let vk = get_r0_verifying_key();
+        let digest = vk.digest();
+        println!("vk digest: {}", digest);
+
+        let mut groth16_digest = Groth16ReceiptVerifierParameters::default();
+
+        let digest = groth16_digest.digest();
+        println!("Default Verifier digest: {}", digest);
+        groth16_digest.verifying_key = vk;
+        let digest = groth16_digest.digest();
+        println!("BITVM2 Verifier digest: {}", digest);
+    }
 }
