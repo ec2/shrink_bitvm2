@@ -160,6 +160,15 @@ pub fn get_r0_verifying_key() -> risc0_groth16::VerifyingKey {
     vk
 }
 
+pub fn verifier_parameters_digest() -> Digest {
+    let vk: risc0_groth16::VerifyingKey = get_r0_verifying_key();
+    let groth16_digest = risc0_zkvm::Groth16ReceiptVerifierParameters {
+        verifying_key: vk,
+        ..Default::default()
+    };
+    groth16_digest.digest()
+}
+
 fn from_seal(seal_bytes: &[u8]) -> ark_groth16::Proof<ark_bn254::Bn254> {
     use ark_bn254::{Fq, Fq2, G1Affine, G2Affine};
     use ark_ff::{Field, PrimeField};

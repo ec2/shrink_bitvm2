@@ -64,9 +64,7 @@ pub fn finalize(
     receipt_claim: MaybePruned<ReceiptClaim>,
     seal: &Groth16Seal,
 ) -> Result<Receipt> {
-    let verifier_parameters_digest =
-        Digest::from_hex("b72859b60cfe0bb13cbde70859fbc67ef9dbd5410bbe66bdb7be64a3dcf6814e")
-            .unwrap(); // TODO(ec2): dont hardcode this. used for selector on chain
+    let verifier_parameters_digest = crate::verify::verifier_parameters_digest();
     let groth16_receipt =
         Groth16Receipt::new(seal.to_vec(), receipt_claim, verifier_parameters_digest);
     let receipt = Receipt::new(

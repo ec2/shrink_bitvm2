@@ -18,5 +18,5 @@ tracing-subscriber = {version = "0.3", features = ["env-filter"] }
 url = "2.5"
 
 [patch.crates-io]
-risc0-ethereum-contracts = { git = "https://github.com/ec2/risc0-ethereum.git", rev = "c553d77ff0f5a18098a12c8892f6bfa6f0553560" }
-risc0-aggregation = { git = "https://github.com/ec2/risc0-ethereum.git", rev = "c553d77ff0f5a18098a12c8892f6bfa6f0553560" }
+risc0-ethereum-contracts = { git = "https://github.com/ec2/risc0-ethereum.git", rev = "2485d3a4ed6b7d0252198c1e8c08a8a63f230313" }
+risc0-aggregation = { git = "https://github.com/ec2/risc0-ethereum.git", rev = "2485d3a4ed6b7d0252198c1e8c08a8a63f230313" }
